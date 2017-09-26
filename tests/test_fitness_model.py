@@ -13,7 +13,7 @@ try:
 except ImportError:
     from io import StringIO
 
-from ..base.fitness_model import fitness_model
+from augur.fitness_model import fitness_model
 
 #
 # Fixtures

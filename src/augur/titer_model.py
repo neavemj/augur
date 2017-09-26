@@ -4,9 +4,10 @@ import logging
 import numpy as np
 import time
 from collections import defaultdict
-from base.io_util import myopen
 from itertools import izip
 import pandas as pd
+
+from .io_util import myopen
 
 TITER_ROUND=4
 logger = logging.getLogger(__name__)

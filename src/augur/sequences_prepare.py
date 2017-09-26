@@ -3,19 +3,20 @@ parse, filter, subsample and save as JSON
 '''
 from __future__ import division, print_function
 import os, re, time, csv, sys
-from base.titer_model import TiterModel
-from io_util import myopen
 from collections import defaultdict
 from Bio import SeqIO
 import numpy as np
-from seq_util import pad_nucleotide_sequences, nuc_alpha, aa_alpha
 from datetime import datetime
 import json
 from pdb import set_trace
 import git
-from utils import fix_names, num_date, ambiguous_date_to_date_range, potentially_combine
 from pprint import pprint
 import logging
+
+from .io_util import myopen
+from .seq_util import pad_nucleotide_sequences, nuc_alpha, aa_alpha
+from .titer_model import TiterModel
+from .utils import fix_names, num_date, ambiguous_date_to_date_range, potentially_combine
 
 logger = logging.getLogger(__name__)
 TINY = 1e-10
