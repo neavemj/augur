@@ -150,5 +150,6 @@ if __name__=="__main__":
         runner.colors()
         runner.latlongs()
         runner.write_to_json(segment_addendum=len(params.segments)>1)
+        runner.write_to_fasta(segment_addendum=len(params.segments)>1) #, fields=runner.config["header_fields"])
         if params.time_interval:
             break

@@ -223,3 +223,27 @@ class prepare(object):
             fname = os.path.join(self.config["output_folder"], prefix + ".json")
             with open(fname, 'w') as fh:
                 obj.write_json(fh, self.config, prefix)
+
+
+    def write_to_fasta(self, segment_addendum=False):
+        from Bio import SeqIO, Seq, SeqRecord
+        for seg, obj in self.segments.iteritems():
+            prefix = self.config["file_prefix"]
+            if segment_addendum:                                # add segment to file
+                if "*segment*" in prefix:                       # replace *segment* placeholder if it exists
+                    prefix = prefix.replace("*segment*", seg)
+                else:                                           # else, append
+                    prefix += "_" + seg
+            fname = os.path.join(self.config["output_folder"], prefix + ".fasta")
+            sequences = []
+            if hasattr(obj, "leaves"):
+                leaves_to_export = obj.leaves
+            else:
+                leaves_to_export = 'all'
+
+            for seq in obj.seqs.values():
+                seq_str = seq.seq
+                sequences.append(SeqRecord.SeqRecord(seq=seq.seq, name=seq.description, id=seq.description, description=""))
+
+            SeqIO.write(sequences, fname, 'fasta')
+
