@@ -380,7 +380,7 @@ class TiterModel(object):
         self.titer_stats()
 
 
-    def _train(self, method='nnl1reg',  lam_drop=1.0, lam_pot = 0.5, lam_avi = 3.0, **kwargs):
+    def _train(self, method='nnl1reg', lam_drop=1.0, lam_pot = 0.5, lam_avi = 3.0, **kwargs):
         '''
         determine the model parameters -- lam_drop, lam_pot, lam_avi are
         the regularization parameters.
@@ -415,7 +415,7 @@ class TiterModel(object):
         return np.mean( (self.titer_dist - np.dot(self.design_matrix, self.model_params))**2 )
 
 
-    def validate(self, plot=False, cutoff=0.0, validation_set = None, fname=None):
+    def validate(self, plot=False, cutoff=0.0, validation_set = None, fname=None, **kwargs):
         '''
         predict titers of the validation set (separate set of test_titers aside previously)
         and compare against known values. If requested by plot=True,
@@ -489,6 +489,41 @@ class TiterModel(object):
             titer_json[ref_clade][test_clade][serum] = [np.round(val,TITER_ROUND), np.median(self.titers.titers[key])]
 
         return titer_json
+
+    def compile_seq_and_titers(self, protein):
+        '''
+        compiles titer measurements into a tsv file organized as a flat list of measurements
+        for each measurement, provide sequence difference
+        '''
+        titer_tsv = []
+
+        header = []
+        header.append("titer")
+        for pos, test_aa in enumerate(self.tree.root.translations['HA1']):
+            col_name = "aa" + str(pos+1)
+            header.append(col_name)
+        titer_tsv.append(header)
+
+        for key, val in self.titers.titers_normalized.iteritems():
+            row = []
+            test_vir, (ref_vir, serum) = key
+            test_node = self.node_lookup[test_vir.upper()]
+            ref_node = self.node_lookup[ref_vir.upper()]
+            test_seq = test_node.translations[protein]
+            ref_seq = ref_node.translations[protein]
+
+            titer = np.round(val,TITER_ROUND)
+            row.append(titer)
+
+            for pos, (test_aa, ref_aa) in enumerate(izip(test_seq, ref_seq)):
+                if test_aa == ref_aa:
+                    row.append("0")
+                else:
+                    row.append("1")
+
+            titer_tsv.append(row)
+
+        return titer_tsv
 
 
     def compile_potencies(self):

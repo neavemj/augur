@@ -6,7 +6,7 @@ import base.process
 from base.fitness_model import process_predictor_args
 from base.process import process
 from base.utils import fix_names
-from flu_titers import HI_model, HI_export, H3N2_scores, seasonal_flu_scores
+from flu_titers import HI_model, HI_export, HI_seq_and_titers_export, H3N2_scores, seasonal_flu_scores
 from flu_info import clade_designations
 import argparse
 import numpy as np
@@ -66,7 +66,8 @@ def make_config (prepared_json, args):
             "criterium": lambda x: sum([len(x.aa_mutations[k]) for k in x.aa_mutations])>0,
             "lam_avi":2.0,
             "lam_pot":0.3,
-            "lam_drop":2.0
+            "lam_drop":2.0,
+            "training_fraction":0.9
         },
         "build_tree": not args.no_tree,
         "estimate_mutation_frequencies": not args.no_mut_freqs,
@@ -575,6 +576,7 @@ if __name__=="__main__":
         runner.config["auspice"]["titers_export"] = True
         if hasattr(runner, "titers"):
             HI_model(runner)
+            HI_seq_and_titers_export(runner)
             if runner.info["lineage"] == "h3n2":
                 H3N2_scores(runner, runner.tree.tree, runner.config["epitope_mask"])
             if runner.config["auspice"]["titers_export"]:

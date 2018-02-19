@@ -42,6 +42,11 @@ def write_json(data, file_name, indent=1):
         json.dump(data, handle, indent=indent)
         handle.close()
 
+def write_tsv(data, file_name):
+    import pandas as pd
+    df = pd.DataFrame(data)
+    df.to_csv(file_name, header=None, index=None, sep='\t')
+
 def tree_to_json(node, extra_attr = []):
     tree_json = {}
     str_attr = ['strain']
