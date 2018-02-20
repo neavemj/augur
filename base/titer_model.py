@@ -490,42 +490,6 @@ class TiterModel(object):
 
         return titer_json
 
-    def compile_seq_and_titers(self, protein):
-        '''
-        compiles titer measurements into a tsv file organized as a flat list of measurements
-        for each measurement, provide sequence difference
-        '''
-        titer_tsv = []
-
-        header = []
-        header.append("titer")
-        for pos, test_aa in enumerate(self.tree.root.translations['HA1']):
-            col_name = "aa" + str(pos+1)
-            header.append(col_name)
-        titer_tsv.append(header)
-
-        for key, val in self.titers.titers_normalized.iteritems():
-            row = []
-            test_vir, (ref_vir, serum) = key
-            test_node = self.node_lookup[test_vir.upper()]
-            ref_node = self.node_lookup[ref_vir.upper()]
-            test_seq = test_node.translations[protein]
-            ref_seq = ref_node.translations[protein]
-
-            titer = np.round(val,TITER_ROUND)
-            row.append(titer)
-
-            for pos, (test_aa, ref_aa) in enumerate(izip(test_seq, ref_seq)):
-                if test_aa == ref_aa:
-                    row.append("0")
-                else:
-                    row.append("1")
-
-            titer_tsv.append(row)
-
-        return titer_tsv
-
-
     def compile_potencies(self):
         '''
         compile a json structure containing potencies for visualization
@@ -858,7 +822,7 @@ class SubstitutionModel(TiterModel):
         return muts
 
 
-    def determine_relevant_mutations(self, min_count=10):
+    def determine_relevant_mutations(self, min_count=1):
         # count how often each mutation separates a reference test virus pair
         self.mutation_counter = defaultdict(int)
         for (test, ref), val in self.train_titers.iteritems():
@@ -988,6 +952,95 @@ class SubstitutionModel(TiterModel):
         return {mut[0]+':'+mut[1]:np.round(val,int(-np.log10(cutoff)))
                 for mut, val in self.substitution_effect.iteritems() if val>cutoff}
 
+    def compile_seq_diff_and_titers(self, protein):
+        '''
+        compiles titer measurements into a tsv file organized as a flat list of measurements
+        for each measurement, provide sequence difference
+        '''
+        titer_tsv = []
+
+        header = []
+        header.append("titer")
+        header.append("serum")
+        for pos, test_aa in enumerate(self.tree.root.translations['HA1']):
+            col_name = "aa" + str(pos+1)
+            header.append(col_name)
+        titer_tsv.append(header)
+
+        for key, val in self.titers.titers_normalized.iteritems():
+            row = []
+            test_vir, (ref_vir, serum) = key
+            test_node = self.node_lookup[test_vir.upper()]
+            ref_node = self.node_lookup[ref_vir.upper()]
+            test_seq = test_node.translations[protein]
+            ref_seq = ref_node.translations[protein]
+
+            titer = np.round(val,TITER_ROUND)
+            row.append(titer)
+            row.append(serum)            
+
+            for pos, (test_aa, ref_aa) in enumerate(izip(test_seq, ref_seq)):
+                if test_aa == ref_aa:
+                    row.append("0")
+                else:
+                    row.append("1")
+
+            titer_tsv.append(row)
+
+        return titer_tsv
+
+    def compile_aa_diff_and_titers(self, protein):
+        '''
+        compiles titer measurements into a tsv file organized as a flat list of measurements
+        for each measurement, provide list of aa differences
+        '''
+        import re
+        titer_tsv = []
+
+        shared_mutations = []
+        for pair in self.relevant_muts:
+            (prot, mut) = pair
+            if prot == protein:
+                m = re.match(r'([A-Z])(\d+)([A-Z])', mut)
+                if m:
+                    sort_aa = sorted([m.group(1), m.group(3)])
+                    sort_mut = sort_aa[0] + m.group(2) + sort_aa[1]
+                    if sort_mut not in shared_mutations:
+                        shared_mutations.append(sort_mut)
+
+        header = []
+        header.append("titer")
+        header.append("serum")
+        header.extend(shared_mutations)
+        titer_tsv.append(header)
+
+        for key, val in self.titers.titers_normalized.iteritems():
+
+            row = []
+            test_vir, (ref_vir, serum) = key
+            titer = np.round(val,TITER_ROUND)
+            row.append(titer)
+            row.append(serum)
+
+            pairs = self.get_mutations(test_vir, ref_vir)
+            current_mutations = []
+            for pair in self.get_mutations(test_vir, ref_vir):
+                (prot, mut) = pair
+                if prot == protein:
+                    m = re.match(r'([A-Z])(\d+)([A-Z])', mut)
+                    if m:
+                        sort_aa = sorted([m.group(1), m.group(3)])
+                        sort_mut = sort_aa[0] + m.group(2) + sort_aa[1]
+                        current_mutations.append(sort_mut)
+            for mut in shared_mutations:
+                if mut in current_mutations:
+                    row.append("1")
+                else:
+                    row.append("0")
+
+            titer_tsv.append(row)
+
+        return titer_tsv
 
 if __name__=="__main__":
     # test tree model (assumes there is a tree called flu in memory...)

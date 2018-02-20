@@ -17,7 +17,7 @@ def HI_model(process):
     process.HI_tree = TreeModel(process.tree.tree, process.titers, **kwargs)
     process.HI_tree.prepare(**kwargs)
     process.HI_tree.train(**kwargs)
-    process.HI_tree.validate(**kwargs)
+    # process.HI_tree.validate(**kwargs)
     # add tree attributes to the list of attributes that are saved in intermediate files
     for n in process.tree.tree.find_clades():
         n.attr['cTiter'] = n.cTiter
@@ -31,7 +31,7 @@ def HI_model(process):
     process.HI_subs = SubstitutionModel(process.tree.tree, process.titers, **kwargs)
     process.HI_subs.prepare(**kwargs)
     process.HI_subs.train(**kwargs)
-    process.HI_subs.validate(**kwargs)
+    # process.HI_subs.validate(**kwargs)
 
     for node in process.tree.tree.find_clades():
         dTiterSub = 0
@@ -76,11 +76,17 @@ def HI_export(process):
     else:
         print('Substitution model not yet trained')
 
-def HI_seq_and_titers_export(process):
+def HI_seq_diff_and_titers_export(process):
     from base.io_util import write_tsv
     prefix='processed/%s'%process.info["prefix"]
-    hi_data = process.HI_tree.compile_seq_and_titers("HA1")
-    write_tsv(hi_data, prefix+'_seq_and_titers.tsv')
+    hi_data = process.HI_subs.compile_seq_diff_and_titers("HA1")
+    write_tsv(hi_data, prefix+'_seq_diff_and_titers.tsv')
+
+def HI_aa_diff_and_titers_export(process):
+    from base.io_util import write_tsv
+    prefix='processed/%s'%process.info["prefix"]
+    hi_data = process.HI_subs.compile_aa_diff_and_titers("HA1")
+    write_tsv(hi_data, prefix+'_aa_diff_and_titers.tsv')
 
 def get_total_peptide(node, segment='ha'):
     '''
