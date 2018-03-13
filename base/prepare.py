@@ -109,13 +109,13 @@ class prepare(object):
                 else:
                     self.log.warn("Filter {} not applied - neither callable or dict of callables".format(fName))
 
-    def subsample(self):
+    def subsample(self, segment_idx = 0):
         """ subsample only the first segment, then filter the rest such that the names match
         note that if reference.include == 2 (per segment) there may be different seqs per segment
         """
         if "subsample" not in self.config or self.config["subsample"] == False:
             return
-        taxa_to_include = self.segments[self.config["segments"][0]].get_subsampled_names(self.config)
+        taxa_to_include = self.segments[self.config["segments"][segment_idx]].get_subsampled_names(self.config)
         for name in self.config["segments"]:
             self.segments[name].filterSeqs("subsampled", lambda s: s.id in taxa_to_include)
             refStr = "(incl. ref)" if self.segments[name].reference.name in self.segments[name].seqs.keys() else "(no Ref)"
