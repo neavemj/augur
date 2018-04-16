@@ -271,12 +271,7 @@ reference_viruses = {
         'A/Singapore/Infimh-16-0019/2016-egg', 'A/Norway/3806/2016-egg',
     ],
     'h1n1pdm':[
-        'A/California/7/2009', 'A/Bangladesh/2021/2012', 'A/Victoria/367/2012', 'A/Brisbane/96/2012',
-        'A/SouthAfrica/3626/2013', 'A/Brisbane/28/2013', 'A/Bolivia/559/2013', 'A/Florida/62/2014',
-        'A/Newcaledonia/58/2014', 'A/Tasmania/24/2014', 'A/Florida/62/2014', 'A/Michigan/45/2015',
-        'A/Perth/103/2015', 'A/Brisbane/181/2015', 'A/Singapore/GP1908/2015', 'A/Iowa/53/2015',
-        'A/StPetersburg/61/2015', 'A/Minnesota/32/2015', 'A/Bangladesh/3002/2015', 'A/Indiana/21/2016',
-        'A/Victoria/503/2016'
+        'A/California/7/2009'
     ],
     'vic':[
         'B/Shangdong/7/1997', 'B/HongKong/330/2001', 'B/Malaysia/2506/2004', 'B/Ohio/1/2005',

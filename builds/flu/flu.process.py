@@ -51,16 +51,23 @@ def make_config(prepared_json, args):
     return {
         "dir": "flu",
         "in": prepared_json,
-        "geo_inference": ['region'],
+        "geo_inference": ['region', 'country'],
+        "geo_inference_options": {
+            "root_state": {
+                "region": "north_america",
+                "country": "mexico"
+            },
+        },
         "auspice": { ## settings for auspice JSON export
-            "panels": ['tree', 'entropy', 'frequencies'],
+            "panels": ['tree', 'map', 'entropy'],
             "extra_attr": ['serum'],
             "color_options": {
                 "region":{"menuItem":"region", "legendTitle":"Region", "key":"region", "type":"discrete"},
-                "clade_membership": {"menuItem": "clade", "legendTitle": "Clade", "key": "clade_membership", "type": "discrete"},
+                "country": {"key":"country", "legendTitle":"Country", "menuItem":"country", "type":"discrete"},
+                "clade_membership": {"menuItem": "clade", "legendTitle": "Clade", "key": "clade_membership", "type": "discrete"}
             },
             "controls": {'authors':['authors']},
-            "defaults": {'colorBy': 'clade_membership',
+            "defaults": {'colorBy': 'region',
                 'geoResolution': 'region',
                 'mapTriplicate': True},
             "titers_export": args.titers_export
@@ -83,9 +90,10 @@ def make_config(prepared_json, args):
         "clean": args.clean,
         "pivot_spacing": args.pivot_spacing,
         "timetree_options": {
-            "Tc": 0.03,
-            # "confidence":True,
-            # "use_marginal":True
+            "Tc": "skyline",
+            "resolve_polytomies": True,
+            "n_points": 20,
+            "stiffness": 3.0
         },
         "newick_tree_options":{
             "method": args.tree_method
