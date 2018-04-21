@@ -22,7 +22,7 @@ config = {
         "panels": ['tree', 'map', 'entropy'],
         "color_options": {
             "country": {"key":"country", "legendTitle":"Country", "menuItem":"country", "type":"discrete", "color_map": []},
-            "host_species": {"key":"host_species", "legendTitle":"Host", "menuItem":"host", "type":"discrete", "color_map": []}            
+            "host_species": {"key":"host_species", "legendTitle":"Host", "menuItem":"host", "type":"discrete", "color_map": []}
         },
         "controls": {'geographic location':['country'], 'authors':['authors']},
         "defaults": {
@@ -30,7 +30,7 @@ config = {
             "geoResolution": "country"
         }
     },
-    "newick_tree_options": {}, #"method":"iqtree"},
+    "newick_tree_options": {"method":"iqtree"},
     "clock_filter":False,
     "timetree_options": {
         "Tc": "skyline",
@@ -38,6 +38,7 @@ config = {
         "n_points": 20,
         "stiffness": 3.0,
         "reroot":"min_dev",
+        "branch_lengths":'input',
         "fixed_clock_rate":0.0006
     }
 }
@@ -56,6 +57,6 @@ if __name__=="__main__":
     runner.align()
     runner.build_tree()
     runner.timetree_setup_filter_run()
-    runner.run_geo_inference()
+    #runner.run_geo_inference()
     runner.save_as_nexus()
     runner.auspice_export()

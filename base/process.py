@@ -564,7 +564,7 @@ class process(object):
             success = False
         if not success:
             self.log.notify("Setting up TimeTree")
-            self.tree.tt_from_file(self.output_path + ".newick", nodefile=None, root="best")
+            self.tree.tt_from_file(self.output_path + ".newick", nodefile=None, root=None)
             self.log.notify("Running Clock Filter")
             self.clock_filter()
             self.tree.remove_outlier_clades() # this is deterministic
