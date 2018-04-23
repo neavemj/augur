@@ -8,9 +8,21 @@ from datetime import datetime
 from base.utils import fix_names
 import argparse
 
-dropped_strains = [
+universally_dropped_strains = [
     'KAK_428', 'NGA/2016/ISTH_0779', 'GUINEA_Z_185a', 'NIGERIA_IKEJI' # overly divergent
 ]
+
+segment_specific_dropped_strains = {
+    "s": [
+        'ISTH-2018-060', 'BniNG-2016-22', 'BniNG-2014-16' # ISTH-BNITM-PHE highly diverged
+    ],
+    "l": [
+        "Mad39", "Mad62", "Mad83", "Mad63", "Mad69", "Mad41", # n=14 divergent clade
+        "Komina_R16", "Soromba_R", "Bamba_R114", "ONM_314", "ONM_299", "ONM_700",  # n=14 divergent clade
+        "BniNG-2014-16", "BniNG-2016-22", "BniNG-2016-21", "BniNG-2016-34"  # n=14 divergent clade
+    ]
+}
+
 forced_strains = [
 ]
 
@@ -30,19 +42,19 @@ def make_config(params):
         "dir": "lassa",
         "file_prefix": "lassa",
         "title": "Real-time tracking of Lassa virus evolution",
-        "maintainer": ["Bedford Lab", "http://bedford.io/team/"],
+        "maintainer": ["James Hadfield", "http://bedford.io/team/james-hadfield/"],
         "input_paths": [
             "../../../flora/data/lassa_s.fasta",
             "../../../flora/data/lassa_l.fasta",
         ],
         "header_fields": {0:'strain', 1:'accesion', 2: 'segment', 3:'date', 4:'region', 5: 'country', 6:'host_species', 7:'authors', 8:'title', 9:'journal', 10:'paper_url'},
         "filters": (
-            ("Dropped Strains", lambda s: s.id not in [fix_names(x) for x in dropped_strains]),
-            ("Restrict Date Range for S segment", {
-                "s": lambda s: True,
-                "l": lambda s: True
+            ("Dropped Strains (All segments)", lambda s: s.id not in [fix_names(x) for x in universally_dropped_strains]),
+            ("Segment-specific dropped strains", {
+                "s": lambda s: s.id not in [fix_names(x) for x in segment_specific_dropped_strains["s"]],
+                "l": lambda s: s.id not in [fix_names(x) for x in segment_specific_dropped_strains["l"]]
+                # "l": tmp,
             }),
-            # ("Restrict Date Range", lambda s: s.attributes['date'] <= datetime(2018,01,1).date()),
             ("Sequence Length", {
                 "s": lambda s: len(s.seq)>=2500,
                 "l": lambda s: len(s.seq)>=5000,
@@ -53,7 +65,7 @@ def make_config(params):
             "threshold": params.viruses_per_month,
             "priority": lambda x:x.id in forced_strains
         },
-        "colors": ["country", "host_species"],
+        "colors": ["authors", "country", "host_species"],
         "color_defs": ["./colors.tsv"],
         "lat_longs": ["country"],
         "auspice_filters": ["country", "authors", "host_species"],

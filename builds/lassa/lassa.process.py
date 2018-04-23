@@ -21,13 +21,18 @@ config = {
     "auspice": { ## settings for auspice JSON export
         "panels": ['tree', 'map', 'entropy'],
         "color_options": {
+            "authors": {"key":"authors", "legendTitle":"Authors", "menuItem":"authors", "type":"discrete"},
             "country": {"key":"country", "legendTitle":"Country", "menuItem":"country", "type":"discrete", "color_map": []},
             "host_species": {"key":"host_species", "legendTitle":"Host", "menuItem":"host", "type":"discrete", "color_map": []}
         },
         "controls": {'geographic location':['country'], 'authors':['authors']},
         "defaults": {
+            # when auspice PR #544 is in master, I think these are the best defaults:
+            # "colorBy": "num_date",
+            # "geoResolution": "country",
+            # 'distanceMeasure': 'div'
             "colorBy": "country",
-            "geoResolution": "country"
+            "geoResolution": "country",
         }
     },
     "newick_tree_options": {"method":"iqtree"},
@@ -57,6 +62,6 @@ if __name__=="__main__":
     runner.align()
     runner.build_tree()
     runner.timetree_setup_filter_run()
-    #runner.run_geo_inference()
+    runner.run_geo_inference()
     runner.save_as_nexus()
     runner.auspice_export()
