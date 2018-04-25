@@ -17,12 +17,13 @@ def collect_args():
 config = {
     "dir": "pangea",
     "subprocess_verbosity_level":3,
-    "geo_inference": ['country'], # what traits to perform this on
+    "geo_inference": ['country', 'subtype'], # what traits to perform this on
     "auspice": { ## settings for auspice JSON export
         "panels": ['tree', 'map', 'entropy'],
         "color_options": {
             "country": {"key":"country", "legendTitle":"Country", "menuItem":"country", "type":"discrete", "color_map": []},
-            "authors": {"key":"authors", "legendTitle":"Authors", "menuItem":"authors", "type":"discrete", "color_map": []}
+            "authors": {"key":"authors", "legendTitle":"Authors", "menuItem":"authors", "type":"discrete", "color_map": []},
+            "subtype": {"key":"subtype", "legendTitle":"Subtype", "menuItem":"subtype", "type":"discrete", "color_map": []}
         },
         "controls": {'geographic location':['country'], 'authors':['authors']},
         "defaults": {
@@ -36,9 +37,7 @@ config = {
         "Tc": "skyline",
         "resolve_polytomies": True,
         "n_points": 20,
-        "stiffness": 3.0,
-        "reroot":"min_dev",
-        "fixed_clock_rate":0.0006
+        "stiffness": 3.0
     }
 }
 

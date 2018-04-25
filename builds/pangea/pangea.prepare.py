@@ -50,7 +50,7 @@ def make_config(params):
             "threshold": params.viruses_per_month,
             "priority": lambda x:x.id in forced_strains
         },
-        "colors": ["country"],
+        "colors": ["country", "authors", "subtype"],
         "color_defs": ["./colors.tsv"],
         "lat_longs": ["country"],
         "auspice_filters": ["country", "authors", "subtype"],
