@@ -31,7 +31,7 @@ config = {
             "geoResolution": "country"
         }
     },
-    "newick_tree_options": {}, #"method":"iqtree"},
+    "newick_tree_options": {"method":"iqtree"}, #"method":"iqtree"},
     "clock_filter":False,
     "timetree_options": {
         "Tc": "skyline",
