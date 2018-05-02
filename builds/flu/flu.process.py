@@ -703,7 +703,17 @@ if __name__=="__main__":
 
     # Predict fitness for HA after all other scores and annotations have completed.
     if runner.info["segment"] == 'ha' and runner.config["annotate_fitness"]:
-        fitness_model = runner.annotate_fitness()
+        if hasattr(runner, "titers"):
+            predictor_kwargs = {
+                "lam_avi": runner.config["titers"]["lam_avi"],
+                "lam_pot": runner.config["titers"]["lam_pot"],
+                "lam_drop": runner.config["titers"]["lam_drop"],
+                "titers": runner.titers
+            }
+        else:
+            predictor_kwargs = {}
+
+        fitness_model = runner.annotate_fitness(predictor_kwargs=predictor_kwargs)
         if fitness_model is not None:
             print("Fitness model parameters: %s" % str(zip(fitness_model.predictors, fitness_model.model_params)))
             print("Fitness model deviations: %s" % str(zip(fitness_model.predictors, fitness_model.global_sds)))
