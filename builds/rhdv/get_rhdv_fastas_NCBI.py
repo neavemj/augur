@@ -14,8 +14,9 @@ mahar_ids = ["MF" + str(rec) for rec in range(421563, 421702)]
 
 Entrez.email = "matthewjneave1@gmail.com"
 
-def retrieve_NCBI_record(NCBI_ID):
-    new_handle = Entrez.efetch(db="nucleotide", id=NCBI_ID, rettype="gb", retmode="genbank")
+
+def retrieve_ncbi_record(ncbi_id):
+    new_handle = Entrez.efetch(db="nucleotide", id=ncbi_id, rettype="gb", retmode="genbank")
     seq_record = SeqIO.read(new_handle, "genbank")
     # extracting several bits of information from different parts of the record
     collection_date = seq_record.features[0].qualifiers["collection_date"][0]
@@ -30,13 +31,14 @@ def retrieve_NCBI_record(NCBI_ID):
                              title, journal])
     return(header, seq_record)
 
+
 # use this function to retrieve all the records and write to fasta file
 # with headers correctly formatted for Nextstrain
 
 mahar_fasta = open("mahar_RHDV.fasta", "w")
 
 for record_id in mahar_ids:
-    record = retrieve_NCBI_record(record_id)
+    record = retrieve_ncbi_record(record_id)
     mahar_fasta.write(record[0] + "\n" + str(record[1].seq) + "\n")
 
 
