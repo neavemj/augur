@@ -26,9 +26,8 @@ def retrieve_NCBI_record(NCBI_ID):
     authors = seq_record.annotations['references'][0].authors.split(",")[0] + " et al"
     title = seq_record.annotations['references'][0].title
     journal = seq_record.annotations['references'][0].journal
-    citation = " ".join([title, journal])
     header = ">" + "|".join([isolate, "RHDV", seq_record.id, genotype, collection_date, country, state, authors,
-                             citation])
+                             title, journal])
     return(header, seq_record)
 
 # use this function to retrieve all the records and write to fasta file
