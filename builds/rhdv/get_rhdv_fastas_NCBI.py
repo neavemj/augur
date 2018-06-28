@@ -27,10 +27,12 @@ def retrieve_NCBI_record(NCBI_ID):
     title = seq_record.annotations['references'][0].title
     journal = seq_record.annotations['references'][0].journal
     citation = " ".join([title, journal])
-    header = ">" + "|".join([isolate, "RHDV", seq_record.id, genotype, collection_date, country, state, authors, citation])
+    header = ">" + "|".join([isolate, "RHDV", seq_record.id, genotype, collection_date, country, state, authors,
+                             citation])
     return(header, seq_record)
 
 # use this function to retrieve all the records and write to fasta file
+# with headers correctly formatted for Nextstrain
 
 mahar_fasta = open("mahar_RHDV.fasta", "w")
 
