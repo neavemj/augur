@@ -17,9 +17,18 @@ Entrez.email = "matthewjneave1@gmail.com"
 def retrieve_NCBI_record(NCBI_ID):
     new_handle = Entrez.efetch(db="nucleotide", id=NCBI_ID, rettype="gb", retmode="genbank")
     seq_record = SeqIO.read(new_handle, "genbank")
-    collection_date = seq_record.features[0].qualifiers["collection_date"]
-    print(seq_record.features[0].qualifiers)
-
+    collection_date = seq_record.features[0].qualifiers["collection_date"][0]
+    isolate = seq_record.features[0].qualifiers["isolate"][0]
+    state = isolate.split("/")[1]
+    country = seq_record.features[0].qualifiers["country"][0]
+    genotype = seq_record.features[0].qualifiers["note"][0].lstrip("genotype: ").replace(" ", "_")
+    print(seq_record.annotations['references'][0])
+    authors = seq_record.annotations['references'][0].authors.split(",")[0] + " et al"
+    title = seq_record.annotations['references'][0].title
+    journal = seq_record.annotations['references'][0].journal
+    citation = title +
+    header = ">" + "|".join([isolate, "RHDV", seq_record.id, genotype, collection_date, country, state, authors])
+    print(header)
 
 
 retrieve_NCBI_record("MF421603")
