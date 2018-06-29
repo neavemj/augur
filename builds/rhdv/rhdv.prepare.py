@@ -46,7 +46,7 @@ config = {
     "reference": {
         "path": "sequence.gb",
         "metadata": {
-            'strain': "GI.1c_(RHDV1_G2)", "date": "2015-06-18", "country": "AUSTRALIA", "state": "NSW"
+            'strain': "RHDV1_G2", "date": "2015-06-18", "country": "AUSTRALIA", "state": "NSW"
         },
         "include": 0,
         "genes": ['polyprotein', 'VP10']
