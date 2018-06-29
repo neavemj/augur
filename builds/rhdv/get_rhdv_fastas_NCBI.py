@@ -23,7 +23,8 @@ def retrieve_ncbi_record(ncbi_id):
     isolate = seq_record.features[0].qualifiers["isolate"][0]
     state = isolate.split("/")[1]
     country = seq_record.features[0].qualifiers["country"][0]
-    genotype = seq_record.features[0].qualifiers["note"][0].lstrip("genotype: ").replace(" ", "_")
+    genotype = seq_record.features[0].qualifiers["note"][0].lstrip("genotype: ").replace(" ", "_").split("(")[
+        1].rstip(")")
     authors = seq_record.annotations['references'][0].authors.split(",")[0] + " et al"
     title = seq_record.annotations['references'][0].title
     journal = seq_record.annotations['references'][0].journal

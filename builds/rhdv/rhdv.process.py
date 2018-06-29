@@ -34,10 +34,14 @@ config = {
         "color_options": {
             "authors": {"key":"authors", "legendTitle":"Authors", "menuItem":"authors", "type":"discrete"},
             "state": {"key":"state", "legendTitle":"State", "menuItem":"state", "type":"discrete"},
-            "country": {"key":"country", "legendTitle":"Country", "menuItem":"country", "type":"discrete"}
+            "country": {"key":"country", "legendTitle":"Country", "menuItem":"country", "type":"discrete"},
+            "rhdv_strain": {"key":"rhdv_strain", "legendTitle":"Strain", "menuItem":"strain", "type":"rhdv_strain"}
         },
-        "controls": {'authors':['authors']},
-        "defaults": {'mapTriplicate': True}
+        "controls": {},
+        "defaults": {
+            'mapTriplicate': False,
+            'colorBy': "state"
+        }
     },
     "timetree_options": {
         "Tc": 'opt',

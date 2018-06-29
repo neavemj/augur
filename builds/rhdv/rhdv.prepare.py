@@ -24,7 +24,7 @@ config = {
     "file_prefix": "rhdv",
     "title": "Monitoring the initial spread and genomic variability of rabbit hemorrhagic disease virus 2 (GI.2) in "
              "the Australian landscape: 2015-2016",
-    "maintainer": ["Robyn Hall and Matthew Neave", ""],
+    "maintainer": ["Robyn Hall and Matthew Neave", "mailto:robyn.hall@csiro.au"],
     "input_paths": ["./data/mahar_RHDV.fasta"],
     # >AUS/ACT/BLMT-3/2015|RHDV|MF421563.1|GI.1c_(RHDV1_G2)|2015-06-18|Australia|ACT|Mahar et al|Monitoring the ini...
     "header_fields": {0:'strain', 3:'rhdv_strain', 4:'date', 5:'country', 6:'state', 7: 'authors', 9:'journal',
@@ -38,19 +38,18 @@ config = {
     "subsample": {
         "category": lambda x:(x.attributes['date'].year, x.attributes['date'].month),
     },
-    "colors": ["country", "state", "authors", "strain"],
+    "colors": ["state", "authors", "rhdv_strain"],
     # "color_defs": ["./colors.tsv"],
-    "lat_longs": ["country"],
     "lat_longs": ["state"],
     "lat_long_defs": "./aus_state_lat_longs.tsv",
-    "auspice_filters": ["country", "state", "authors", "strain"],
+    "auspice_filters": ["state", "authors", "rhdv_strain"],
     "reference": {
         "path": "sequence.gb",
         "metadata": {
             'strain': "GI.1c_(RHDV1_G2)", "date": "2015-06-18", "country": "AUSTRALIA", "state": "NSW"
         },
         "include": 0,
-        "genes": ['ORF1', 'ORF2']
+        "genes": ['polyprotein', 'VP10']
     }
 }
 
