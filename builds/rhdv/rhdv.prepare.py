@@ -26,7 +26,7 @@ config = {
              "the Australian landscape: 2015-2016",
     "maintainer": ["Robyn Hall and Matthew Neave", "mailto:robyn.hall@csiro.au"],
     "input_paths": ["./data/mahar_RHDV.fasta"],
-    # >AUS/ACT/BLMT-3/2015|RHDV|MF421563.1|GI.1c_(RHDV1_G2)|2015-06-18|Australia|ACT|Mahar et al|Monitoring the ini...
+    # >AUS/ACT/BLMT-3/2015|RHDV|MF421563.1|RHDV1_G2|2015-06-18|Australia|ACT|Mahar et al|Monitoring the ini...
     "header_fields": {0:'strain', 3:'rhdv_strain', 4:'date', 5:'country', 6:'state', 7: 'authors', 9:'journal',
                       8:'title'},
     "filters": (
