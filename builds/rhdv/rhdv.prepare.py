@@ -16,8 +16,11 @@ def collect_args():
     )
     return parser
 
-dropped_strains = [
-]
+dropped_strains = ["AUS/NSW/YAR-1/2015", "AUS/WA/GER-2/2016", "AUS/WA/GER-1/2016", "AUS/WA/GER-5/2016",
+                   "AUS/WA/GER-4/2016", "AUS/WA/GER-3/2016", "AUS/ACT/BLMT-3/2015", "AUS/ACT/AIN-3/2015",
+                   "AUS/TAS/GEE-2/2016", "AUS/VIC/CWS-1/2016", "AUS/TAS/BRK-1/2016", "AUS/TAS/GRA-1/2016"
+] # these get dropped because they are too different. If I don't remove them here the filter goes the other way and
+# basically removes all the sequences - only when blmt-1 is included though.
 
 config = {
     "dir": "rhdv",
@@ -40,8 +43,8 @@ config = {
     },
     "colors": ["state", "authors", "rhdv_strain"],
     # "color_defs": ["./colors.tsv"],
-    "lat_longs": ["state"],
-    "lat_long_defs": "./aus_state_lat_longs.tsv",
+    "lat_longs": ["isolate"],
+    "lat_long_defs": "./RHDV2_coords.edit.txt",
     "auspice_filters": ["state", "authors", "rhdv_strain"],
     "reference": {
         "path": "sequence.gb",
