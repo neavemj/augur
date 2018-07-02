@@ -25,10 +25,10 @@ config = {
     "title": "Monitoring the initial spread and genomic variability of rabbit hemorrhagic disease virus 2 (GI.2) in "
              "the Australian landscape: 2015-2016",
     "maintainer": ["Robyn Hall and Matthew Neave", "mailto:robyn.hall@csiro.au"],
-    "input_paths": ["./data/mahar_RHDV.fasta"],
-    # >AUS/ACT/BLMT-3/2015|RHDV|MF421563.1|RHDV1_G2|2015-06-18|Australia|ACT|Mahar et al|Monitoring the ini...
-    "header_fields": {0:'strain', 3:'rhdv_strain', 4:'date', 5:'country', 6:'state', 7: 'authors', 9:'journal',
-                      8:'title'},
+    "input_paths": ["./data/mahar_RHDV.edit.fasta"],
+    #>AUS/ACT/BLMT-3/2015|blmt-3|RHDV|MF421563.1|RHDV1_G2|2015-06-18|Australia|ACT|Mahar et al|Monitoring the init
+    "header_fields": {0:'strain', 1:'isolate', 4:'rhdv_strain', 5:'date', 6:'country', 7:'state', 8: 'authors',
+                      10:'journal', 9:'title'},
     "filters": (
         ("Dropped Strains", lambda s: s.id not in [fix_names(x) for x in dropped_strains]),
         # ("Restrict Date Range", lambda s: s.attributes['date'] >= datetime(2012,01,1).date()),
