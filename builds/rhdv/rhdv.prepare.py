@@ -47,9 +47,9 @@ config = {
     "lat_long_defs": "./RHDV2_coords.edit.txt",
     "auspice_filters": ["state", "authors", "rhdv_strain"],
     "reference": {
-        "path": "sequence.gb",
+        "path": "sequence2.gb",
         "metadata": {
-            'strain': "RHDV1_G2", "date": "2015-06-18", "country": "AUSTRALIA", "state": "NSW"
+            'strain': "RHDV1_G2", "date": "2015-05-13", "country": "AUSTRALIA", "state": "ACT"
         },
         "include": 0,
         "genes": ['polyprotein', 'VP10']
