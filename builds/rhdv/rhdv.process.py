@@ -23,8 +23,8 @@ config = {
     "clock_filter": {
         "n_iqd": 4,
     },
-    "geo_inference": ['isolate'],
-    # "geo_inference": False,
+    #"geo_inference": ['isolate'],
+    "geo_inference": False,
     # "geo_inference": ['country', 'state'], # what traits to perform this on
     "geo_inference_options": {
         "root_state": {
