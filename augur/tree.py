@@ -1,7 +1,6 @@
 import os, shutil, time
 from Bio import Phylo
-from .utils import read_metadata, get_numerical_dates, write_json
-from treetime.vcf_utils import read_vcf, write_vcf
+from treetime.vcf_utils import read_vcf
 import numpy as np
 
 def find_executable(names, default = None):
@@ -65,6 +64,7 @@ def build_fasttree(aln_file, out_file, clean_up=True):
     '''
     build tree using fasttree with parameters "-nt"
     '''
+    log_file = out_file + ".log"
 
     fasttree = find_executable([
         # Search order is based on expected parallelism and accuracy
@@ -77,7 +77,7 @@ def build_fasttree(aln_file, out_file, clean_up=True):
         "fasttree"
     ])
 
-    call = [fasttree, "-nt", aln_file, "1>", out_file, "2>", "fasttree.log"]
+    call = [fasttree, "-nt", aln_file, "1>", out_file, "2>", log_file]
     cmd = " ".join(call)
     print("Building a tree via:\n\t" + cmd +
           "\n\tPrice et al: FastTree 2 - Approximately Maximum-Likelihood Trees for Large Alignments." +
@@ -86,7 +86,7 @@ def build_fasttree(aln_file, out_file, clean_up=True):
     try:
         T = Phylo.read(out_file, 'newick')
         if clean_up:
-            os.remove('fasttree.log')
+            os.remove(log_file)
     except:
         print("TREE BUILDING FAILED")
         T=None
@@ -94,7 +94,7 @@ def build_fasttree(aln_file, out_file, clean_up=True):
     return T
 
 
-def build_iqtree(aln_file, out_file, iqmodel="HKY+F", clean_up=True, nthreads=2):
+def build_iqtree(aln_file, out_file, substitution_model="GTR", clean_up=True, nthreads=2):
     '''
     build tree using IQ-Tree with parameters "-fast"
     arguments:
@@ -110,19 +110,36 @@ def build_iqtree(aln_file, out_file, iqmodel="HKY+F", clean_up=True, nthreads=2)
         for line in tmp_seqs:
             ofile.write(line.replace('/', '_X_X_').replace('|','_Y_Y_'))
 
-    if iqmodel.lower() != "none":
-        call = ["iqtree", "-fast -nt", str(nthreads), "-s", aln_file, "-m", iqmodel,
+    # For compat with older versions of iqtree, we avoid the newish -fast
+    # option alias and instead spell out its component parts:
+    #
+    #     -ninit 2
+    #     -n 2
+    #     -me 0.05
+    #
+    # This may need to be updated in the future if we want to stay in lock-step
+    # with -fast, although there's probably no particular reason we have to.
+    # Refer to the handling of -fast in utils/tools.cpp:
+    #   https://github.com/Cibiv/IQ-TREE/blob/44753aba/utils/tools.cpp#L2926-L2936
+    fast_opts = [
+        "-ninit", "2",
+        "-n",     "2",
+        "-me",    "0.05"
+    ]
+
+    if substitution_model.lower() != "none":
+        call = ["iqtree", *fast_opts, "-nt", str(nthreads), "-s", aln_file, "-m", substitution_model,
             ">", "iqtree.log"]
     else:
-        call = ["iqtree", "-fast -nt", str(nthreads), "-s", aln_file, ">", "iqtree.log"]
+        call = ["iqtree", *fast_opts, "-nt", str(nthreads), "-s", aln_file, ">", "iqtree.log"]
 
     cmd = " ".join(call)
 
     print("Building a tree via:\n\t" + cmd +
           "\n\tNguyen et al: IQ-TREE: A fast and effective stochastic algorithm for estimating maximum likelihood phylogenies."
           "\n\tMol. Biol. Evol., 32:268-274. https://doi.org/10.1093/molbev/msu300\n")
-    if iqmodel.lower() == "none":
-        print("Conducting a model test... see iqtree.log for the result. You can specify this with --iqmodel in future runs.")
+    if substitution_model.lower() == "none":
+        print("Conducting a model test... see iqtree.log for the result. You can specify this with --substitution-model in future runs.")
     os.system(cmd)
 
     # Check result
@@ -132,7 +149,7 @@ def build_iqtree(aln_file, out_file, iqmodel="HKY+F", clean_up=True, nthreads=2)
         #this allows the user to check intermediate output, as tree.nwk will be
         if clean_up:
             #allow user to see chosen model if modeltest was run
-            if iqmodel.lower() == 'none':
+            if substitution_model.lower() == 'none':
                 shutil.copyfile('iqtree.log', out_file.replace(out_file.split('/')[-1],"iqtree.log"))
             os.remove('iqtree.log')
             os.remove(aln_file)
@@ -160,9 +177,20 @@ def write_out_informative_fasta(compress_seq, alignment, stripFile=None):
     #IF FIND STANDARDIZED DRM FILE FORMAT, IMPLEMENT HERE
     strip_pos = []
     if stripFile:
-        with open(stripFile, 'r') as ifile:
-            strip_pos = [int(line.strip()) for line in ifile]
-
+        if stripFile.lower().endswith('.bed'): #BED format file
+            import pandas as pd
+            bed = pd.read_csv(stripFile, sep='\t')
+            for index, row in bed.iterrows():
+                strip_pos.extend(list(range(row[1], row[2]+1)))
+        else: #site-per-line format or DRM-file format
+            with open(stripFile, 'r') as ifile:
+                line1 = ifile.readline()
+                if '\t' in line1: #DRM-file format
+                    strip_pos = [int(line.strip().split('\t')[1]) for line in ifile]
+                else: #site-per-line
+                    strip_pos = [int(line.strip()) for line in ifile]
+                    strip_pos.append(int(line1.strip())) #add back 1st line
+        strip_pos = np.unique(strip_pos)
     #Get sequence names
     seqNames = list(sequences.keys())
 
@@ -234,25 +262,22 @@ def run(args):
 
     # construct reduced alignment if needed
     if is_vcf:
-        variable_fasta = write_out_informative_fasta(compress_seq, args.alignment, stripFile=args.strip_sites)
+        variable_fasta = write_out_informative_fasta(compress_seq, args.alignment, stripFile=args.exclude_sites)
         fasta = variable_fasta
     else:
         fasta = aln
 
-    if args.iqmodel and not args.method=='iqtree':
+    if args.substitution_model and not args.method=='iqtree':
         print("Cannot specify model unless using IQTree. Model specification ignored.")
 
     if args.method=='raxml':
         T = build_raxml(fasta, tree_fname, args.nthreads)
     elif args.method=='iqtree':
-        T = build_iqtree(fasta, tree_fname, args.iqmodel, args.nthreads)
+        T = build_iqtree(fasta, tree_fname, args.substitution_model, args.nthreads)
     else: #use fasttree - if add more options, put another check here
         T = build_fasttree(fasta, tree_fname)
     end = time.time()
     print("Building original tree took {} seconds".format(str(end-start)))
-
-    if is_vcf and not args.keep_vcf_fasta:
-        os.remove(variable_fasta)
 
     if T:
         import json

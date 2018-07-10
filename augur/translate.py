@@ -1,4 +1,4 @@
-import os
+import os, sys
 import numpy as np
 from Bio import SeqIO, SeqFeature, Seq, SeqRecord, Phylo
 from .utils import read_node_data, load_features, write_json, write_VCF_translation
@@ -38,7 +38,7 @@ def safe_translate(sequence, report_exceptions=False):
         if len(sequence)%3 != 0:
             #This gives messy BiopythonWarning, so avoid.
             #But can result in lots of printing if doing all TB genes. Better way?
-            print("Gene length is not a multiple of 3. Adding trailing N's before translating.")
+            print("Gene length is not a multiple of 3. Adding trailing N's before translating.", file=sys.stderr)
             while len(sequence)%3 != 0:
                 sequence += "N"
         translated_sequence = str(Seq.Seq(sequence).translate(gap='-'))
@@ -166,6 +166,9 @@ def translate_vcf_feature(sequences, ref, feature):
     else:
         return prot
 
+def construct_mut(start, pos, end):
+    return str(start) + str(pos) + str(end)
+
 def assign_aa_vcf(tree, translations):
     aa_muts = {}
 
@@ -181,11 +184,11 @@ def assign_aa_vcf(tree, translations):
                     #if pos in both, check if same
                     if pos in n_muts and pos in c_muts:
                         if n_muts[pos] != c_muts[pos]:
-                            tmp.append((n_muts[pos],int(pos+1),c_muts[pos]))
+                            tmp.append(construct_mut(n_muts[pos], int(pos+1), c_muts[pos]))
                     elif pos in n_muts:
-                        tmp.append((n_muts[pos],int(pos+1),prot['reference'][pos]))
+                        tmp.append(construct_mut(n_muts[pos], int(pos+1), prot['reference'][pos]))
                     elif pos in c_muts:
-                        tmp.append((prot['reference'][pos],int(pos+1),c_muts[pos]))
+                        tmp.append(construct_mut(prot['reference'][pos], int(pos+1), c_muts[pos]))
 
                 aa_muts[c.name]["aa_muts"][fname] = tmp
 
@@ -221,16 +224,16 @@ def run(args):
 
     ## check file format and read in sequences
     is_vcf = False
-    if args.vcf_input:
+    if any([args.ancestral_sequences.lower().endswith(x) for x in ['.vcf', '.vcf.gz']]):
         if not args.vcf_reference:
             print("ERROR: a reference Fasta is required with VCF-format input")
             return -1
-        compress_seq = read_vcf(args.vcf_input, args.vcf_reference)
+        compress_seq = read_vcf(args.ancestral_sequences, args.vcf_reference)
         sequences = compress_seq['sequences']
         ref = compress_seq['reference']
         is_vcf = True
     else:
-        node_data = read_node_data(args.node_data)
+        node_data = read_node_data(args.ancestral_sequences, args.tree)
         if node_data is None:
             print("ERROR: could not read node data (incl sequences)")
             return -1
@@ -287,25 +290,32 @@ def run(args):
             for fname, aln in translations.items():
                 for c in n:
                     if c.name in aln and n.name in aln:
-                        tmp = [(a,pos,d) for pos, (a,d) in
+                        tmp = [construct_mut(a, int(pos+1), d) for pos, (a,d) in
                                 enumerate(zip(aln[n.name], aln[c.name])) if a!=d]
-                    aa_muts[c.name]["aa_muts"][fname] = tmp
+                        aa_muts[c.name]["aa_muts"][fname] = tmp
+                    else:
+                        print("no sequence pair for nodes %s-%s"%(c.name, n.name))
 
     write_json({'annotations':annotations, 'nodes':aa_muts}, args.output)
+    print("amino acid mutations written to",args.output, file=sys.stdout)
 
     ## write alignments to file is requested
-    if args.alignment_output and '%GENE' in args.alignment_output:
-        for fname, seqs in translations.items():
-            SeqIO.write([SeqRecord.SeqRecord(seq=Seq.Seq(s), id=sname, name=sname, description='')
-                         for sname, s in seqs.items()],
-                         args.alignment_output.replace('%GENE', fname), 'fasta')
-
-    ## write VCF-style output if requested
-    if args.vcf_output:
-        fileEndings = -1
-        if args.vcf_output.lower().endswith('.gz'):
-            fileEndings = -2
-        vcf_out_ref = '.'.join(args.vcf_output.split('.')[:fileEndings]) + '_reference.fasta'
-        write_VCF_translation(translations, args.vcf_output, vcf_out_ref)
+    if args.alignment_output:
+        if is_vcf:
+            ## write VCF-style output if requested
+            fileEndings = -1
+            if args.alignment_output.lower().endswith('.gz'):
+                fileEndings = -2
+            vcf_out_ref = '.'.join(args.alignment_output.split('.')[:fileEndings]) + '_reference.fasta'
+            write_VCF_translation(translations, args.alignment_output, vcf_out_ref)
+        else:
+            ## write fasta-style output if requested
+            if '%GENE' in args.alignment_output:
+                for fname, seqs in translations.items():
+                    SeqIO.write([SeqRecord.SeqRecord(seq=Seq.Seq(s), id=sname, name=sname, description='')
+                                 for sname, s in seqs.items()],
+                                 args.alignment_output.replace('%GENE', fname), 'fasta')
+            else:
+                print("ERROR: alignment output file does not contain '%GENE', so will not be written.")
 
 

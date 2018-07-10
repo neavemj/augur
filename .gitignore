@@ -2,7 +2,6 @@
 environment*
 temp*
 results*
-data/
 dengue/utils/
 prepared/
 processed/
@@ -11,7 +10,10 @@ test_input/
 test_output/
 scratch/
 s3/
+build/
+dist/
 .snakemake
+*stderr
 
 # For Python #
 ##############
